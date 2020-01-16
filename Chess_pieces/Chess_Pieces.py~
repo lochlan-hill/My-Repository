@@ -1,0 +1,263 @@
+"""
+Chess Pieces
+"""
+
+class Piece(object):
+    """
+        Super class for all chess pieces
+    """
+    def __init__(self, piece_name, grid_x, grid_y, colour, canvas, matrix, highlights):
+        """
+            Initialise superclass for chess piece
+            piece_name: str
+            piece_worth: float
+            
+        """
+        self._piece_name = piece_name
+        self._x = grid_x
+        self._y = grid_y
+        self._colour = colour
+        self._canvas = canvas
+        self._matrix = matrix
+        self._highlights = highlights
+        
+    def get_x(self):
+        return self._x
+
+    def get_y(self):
+        return self._y
+
+
+class Pawn(Piece):
+    def __init__(self, piece_name, grid_x, grid_y, colour, canvas, matrix, highlights, moved):
+        super().__init__(piece_name, grid_x, grid_y, colour, canvas, matrix, highlights)
+        self._moved = moved
+
+        #Draw Piece
+        self._canvas.create_oval(self._x*100, self._y*100, self._x*100-100, self._y*100-100, fill=self._colour)
+
+        #Update Piece Location Matrix
+        self._matrix[int(self._y)-2][int(self._x)-2] = piece_name
+           
+        if colour == "black":   
+            if self._moved == True:
+                self._possible_moves = [(self._x,self._y+1)]
+            else:
+                self._possible_moves = [(self._x,self._y+1), (self._x,self._y+2)]
+                
+            self._possible_captures = [(self._x-1,self._y+1), (self._x+1,self._y+1)]
+                
+        if colour == "white":
+            if self._moved == True:
+                self._possible_moves = [(self._x,self._y-1)]
+            else:
+                self._possible_moves = [(self._x,self._y-1), (self._x,self._y-2)]
+
+            self._possible_captures = [(self._x-1,self._y-1), (self._x+1,self._y-1)]               
+
+
+    def highlight_moves(self, matrix):
+        #Define Highlights
+        self._highlights = []
+
+        for move in self._possible_moves:
+            x, y = move
+            if 2 <= x <= 9 and 2 <= y <= 9 and self._matrix[y-2][x-2] == None:
+                highlight_square = self._canvas.create_rectangle(x*100, y*100, x*100-100, y*100-100, fill="blue")
+                #Update Piece Location Matrix
+                self._matrix[y-2][x-2] = "Highlight_"+self._piece_name 
+                self._highlights.append(highlight_square)
+                
+    """
+    def highlight_takes(self, matrix):
+        for take in self._possible_captures:
+            x, y = take
+            if 2 <= x <= 9 and 2 <= y <= 9:
+                self._canvas.create_rectangle(x*100, y*100, x*100-100, y*100-100, fill="red")
+
+            
+    """
+    
+    def check_move(self):
+        return have_moved
+
+    def clear_highlights(self):
+        self._highlights = []
+
+    def _remove_highlights(self):
+        count = 0
+        count_again = 0
+        print(self._piece_name, self._highlights)
+        for i in self._highlights:
+            self._canvas.delete(i)
+
+        
+        for i in self._matrix:
+            #print(i)
+            count+=1
+            for j in i:
+                count_again+=1
+                count_again = count_again%8
+                if j == None:
+                    continue
+                elif "Highlight" in j:
+                    #print(j)
+                    #print(count)
+                    #print(count_again)
+                    #print(self._matrix)
+                    self._matrix[count-1][count_again-1] = None
+
+
+class Castle(Piece):
+    def __init__(self, piece_name, grid_x, grid_y, colour, canvas, matrix, highlights):
+        super().__init__(piece_name, grid_x, grid_y, colour, canvas, matrix, highlights)
+
+        #Draw Piece
+        self._canvas.create_rectangle((self._x*100)-10,(self._y*100)-10, (self._x*100)-90, (self._y*100)-90, fill=self._colour)
+
+        #Update Piece Location Matrix
+        self._matrix[int(self._y)-2][int(self._x)-2] = piece_name
+
+
+        self._possible_moves1 = [(self._x+1,self._y),(self._x+2,self._y),(self._x+3,self._y),(self._x+4,self._y),(self._x+5,self._y),(self._x+6,self._y),(self._x+7,self._y),(self._x+8,self._y)]
+        self._possible_moves2 = [(self._x-1,self._y),(self._x-2,self._y),(self._x-3,self._y),(self._x-4,self._y),(self._x-5,self._y),(self._x-6,self._y),(self._x-7,self._y),(self._x-8,self._y)]
+        self._possible_moves3 = [(self._x,self._y+1),(self._x,self._y+2),(self._x,self._y+3),(self._x,self._y+4),(self._x,self._y+5),(self._x,self._y+6),(self._x,self._y+7),(self._x,self._y+8)]
+        self._possible_moves4 = [(self._x,self._y-1),(self._x,self._y-2),(self._x,self._y-3),(self._x,self._y-4),(self._x,self._y-5),(self._x,self._y-6),(self._x,self._y-7),(self._x,self._y-8)]
+        
+        #self._possible_captures = self._possible_moves
+
+              
+    def highlight_moves(self, matrix):
+        self._highlights = []
+        
+        for move in self._possible_moves1:
+            x, y = move
+
+            if 2 <= x <= 9 and 2 <= y <= 9:
+                if self._matrix[y-2][x-2] != None:
+                    break
+                if self._matrix[y-2][x-2] == None:
+
+                    highlight_square = self._canvas.create_rectangle(x*100, y*100, x*100-100, y*100-100, fill="blue")
+                    #Update Piece Location Matrix
+                    self._matrix[y-2][x-2] = "Highlight_"+self._piece_name 
+                    self._highlights.append(highlight_square)
+            else:
+                continue
+            
+        for move in self._possible_moves2:
+            x, y = move
+
+            if 2 <= x <= 9 and 2 <= y <= 9:
+                if self._matrix[y-2][x-2] != None:
+                    break
+                if self._matrix[y-2][x-2] == None:
+
+                    highlight_square = self._canvas.create_rectangle(x*100, y*100, x*100-100, y*100-100, fill="blue")
+                    highlight_square = self._canvas.create_rectangle(x*100, y*100, x*100-100, y*100-100, fill="blue")
+                    #Update Piece Location Matrix
+                    self._matrix[y-2][x-2] = "Highlight_"+self._piece_name 
+                    self._highlights.append(highlight_square)
+            else:
+                continue
+
+        for move in self._possible_moves3:
+            x, y = move
+
+            if 2 <= x <= 9 and 2 <= y <= 9:
+                if self._matrix[y-2][x-2] != None:
+                    break
+                if self._matrix[y-2][x-2] == None:
+
+                    highlight_square = self._canvas.create_rectangle(x*100, y*100, x*100-100, y*100-100, fill="blue")
+                    highlight_square = self._canvas.create_rectangle(x*100, y*100, x*100-100, y*100-100, fill="blue")
+                    #Update Piece Location Matrix
+                    self._matrix[y-2][x-2] = "Highlight_"+self._piece_name 
+                    self._highlights.append(highlight_square)
+            else:
+                continue
+            
+        for move in self._possible_moves4:
+            x, y = move
+
+            if 2 <= x <= 9 and 2 <= y <= 9:
+                if self._matrix[y-2][x-2] != None:
+                    break
+                if self._matrix[y-2][x-2] == None:
+                    highlight_square = self._canvas.create_rectangle(x*100, y*100, x*100-100, y*100-100, fill="blue")
+                    highlight_square = self._canvas.create_rectangle(x*100, y*100, x*100-100, y*100-100, fill="blue")
+                    #Update Piece Location Matrix
+                    self._matrix[y-2][x-2] = "Highlight_"+self._piece_name 
+                    self._highlights.append(highlight_square)
+            else:
+                continue
+    
+    def clear_highlights(self):
+        self._highlights = []
+        
+    def _remove_highlights(self):
+        count = 0
+        count_again = 0
+        print(self._piece_name, self._highlights)
+        for i in self._highlights:
+            self._canvas.delete(i)
+
+        for i in self._matrix:
+            #print(i)
+            count+=1
+            for j in i:
+                count_again+=1
+                count_again = count_again%8
+                if j == None:
+                    continue
+                elif "Highlight" in j:
+                    print(j)
+                    print(count)
+                    print(count_again)
+                    print(self._matrix)
+                    self._matrix[count-1][count_again-1] = None
+
+
+
+
+class Bishop(Piece):
+    def __init__(self, piece_name, grid_x, grid_y, colour, canvas, matrix):
+        super().__init__(piece_name, grid_x, grid_y, colour, canvas, matrix)
+
+        self._possible_moves = [(x+1,y+1), (x+2,y+2), (x+3,y+3), (x+4,y+4), (x+5,y+5), (x+6,y+6), (x+7,y+7),
+                                (x+1,y-1), (x+2,y-2), (x+3,y-3), (x+4,y-4), (x+5,y-5), (x+6,y-6), (x+7,y-7),
+                                (x-1,y+1), (x-2,y+2), (x-3,y+3), (x-4,y+4), (x-5,y+5), (x-6,y+6), (x-7,y+7),
+                                (x-1,y-1), (x-2,y-2), (x-3,y-3), (x-4,y-4), (x-5,y-5), (x-6,y-6), (x-7,y-7)]
+        self._possible_captures = self._possible_moves
+
+                                       
+
+                                                      
+class Knight(Piece):
+    def __init__(self):
+        super(self, piece_name="Knight", piece_worth=3, grid_location=(x,y)).__init__()
+        
+        self._possible_moves = [(x+1,y+2), (x-1,y+2), (x+2,y+1), (x-2,y+1), (x+1,y-2), (x-1,y-2), (x-2,y-2), (x+2,y-1)]
+        self._possible_captures = self._possible_moves
+
+     
+        
+
+class Queen(Piece):
+    def __init__(self):
+        super(self, piece_name="Queen", piece_worth=9, grid_location=(x,y)).__init__()
+
+
+
+
+class King(Piece):
+    def __init__(self):
+        super(self, piece_name="King", piece_worth=1000, grid_location=(x,y)).__init__()
+
+
+        
+
+
+
+        
+

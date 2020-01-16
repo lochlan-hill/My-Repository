@@ -1,0 +1,208 @@
+"""
+CHESS
+"""
+
+import tkinter as tk
+from tkinter import *
+import math
+
+from Chess_Pieces import Piece, Pawn, Knight, Bishop, Castle, Queen, King
+
+
+BOARD_DIMENSIONS = 8
+
+
+class Board(object):
+    def __init__(self, master, width, height, pieces):
+
+        self._width = width
+        self._height = height
+        self._pieces = pieces
+
+        
+
+        self._drawing_area = tk.Canvas(master, bg="white", width=1000, height=1000)
+        self._drawing_area.pack()
+
+        #Define Piece Location Matrix
+        self._piece_location_matrix = [[None, None, None, None, None, None, None, None],
+                                       [None, None, None, None, None, None, None, None],
+                                       [None, None, None, None, None, None, None, None],
+                                       [None, None, None, None, None, None, None, None],
+                                       [None, None, None, None, None, None, None, None],
+                                       [None, None, None, None, None, None, None, None],
+                                       [None, None, None, None, None, None, None, None],
+                                       [None, None, None, None, None, None, None, None]]
+
+        # Vertical Lines        
+        self._drawing_area.create_line([100,100], [100,900], fill="black")
+        self._drawing_area.create_line([200,100], [200,900], fill="black")
+        self._drawing_area.create_line([300,100], [300,900], fill="black")
+        self._drawing_area.create_line([400,100], [400,900], fill="black")
+        self._drawing_area.create_line([500,100], [500,900], fill="black")
+        self._drawing_area.create_line([600,100], [600,900], fill="black")
+        self._drawing_area.create_line([700,100], [700,900], fill="black")
+        self._drawing_area.create_line([800,100], [800,900], fill="black")
+        self._drawing_area.create_line([900,100], [900,900], fill="black")
+        
+
+        # Horizontal Lines
+        self._drawing_area.create_line([100,100], [900,100], fill="black")
+        self._drawing_area.create_line([100,200], [900,200], fill="black")
+        self._drawing_area.create_line([100,300], [900,300], fill="black")
+        self._drawing_area.create_line([100,400], [900,400], fill="black")
+        self._drawing_area.create_line([100,500], [900,500], fill="black")
+        self._drawing_area.create_line([100,600], [900,600], fill="black")
+        self._drawing_area.create_line([100,700], [900,700], fill="black")
+        self._drawing_area.create_line([100,800], [900,800], fill="black")
+        self._drawing_area.create_line([100,900], [900,900], fill="black")
+
+        #Shade in Squares
+        for i in range(0,5):
+            self._drawing_area.create_rectangle(200, 200*(i-1)+100, 300, 200*(i-1)+200, outline='black', fill = 'green')
+            self._drawing_area.create_rectangle(400, 200*(i-1)+100, 500, 200*(i-1)+200, outline='black', fill = 'green')
+            self._drawing_area.create_rectangle(600, 200*(i-1)+100, 700, 200*(i-1)+200, outline='black', fill = 'green')
+            self._drawing_area.create_rectangle(800, 200*(i-1)+100, 900, 200*(i-1)+200, outline='black', fill = 'green')
+
+        for i in range(0,4):
+            self._drawing_area.create_rectangle(100, 200*(i)+200, 200, 200*(i)+300, outline='black', fill = 'green')
+            self._drawing_area.create_rectangle(300, 200*(i)+200, 400, 200*(i)+300, outline='black', fill = 'green')
+            self._drawing_area.create_rectangle(500, 200*(i)+200, 600, 200*(i)+300, outline='black', fill = 'green')
+            self._drawing_area.create_rectangle(700, 200*(i)+200, 800, 200*(i)+300, outline='black', fill = 'green')
+
+        self._black_pawn1 = Pawn("black_Pawn1",2,3, "black", self._drawing_area, self._piece_location_matrix, [], False)
+        self._black_pawn2 = Pawn("black_Pawn2",3,3, "black", self._drawing_area, self._piece_location_matrix, [], False)
+        self._black_pawn3 = Pawn("black_Pawn3",4,3, "black", self._drawing_area, self._piece_location_matrix, [], False)
+        self._black_pawn4 = Pawn("black_Pawn4",5,3, "black", self._drawing_area, self._piece_location_matrix, [], False)
+        self._black_pawn5 = Pawn("black_Pawn5",6,3, "black", self._drawing_area, self._piece_location_matrix, [], False)
+        self._black_pawn6 = Pawn("black_Pawn6",7,3, "black", self._drawing_area, self._piece_location_matrix, [], False)
+        self._black_pawn7 = Pawn("black_Pawn7",8,3, "black", self._drawing_area, self._piece_location_matrix, [], False)
+        self._black_pawn8 = Pawn("black_Pawn8",9,3, "black", self._drawing_area, self._piece_location_matrix, [], False)
+        #SHOULD BE 2
+        self._black_castle1 = Castle("black_Castle1",2,4, "black", self._drawing_area, self._piece_location_matrix, []) 
+        self._black_castle2 = Castle("black_Castle2",9,7, "black", self._drawing_area, self._piece_location_matrix, [])
+
+     
+        self._white_pawn1 = Pawn("white_Pawn1",2,8, "white", self._drawing_area, self._piece_location_matrix, [], False)
+        self._white_pawn2 = Pawn("white_Pawn2",3,8, "white", self._drawing_area, self._piece_location_matrix, [], False)
+        self._white_pawn3 = Pawn("white_Pawn3",4,8, "white", self._drawing_area, self._piece_location_matrix, [], False)
+        self._white_pawn4 = Pawn("white_Pawn4",5,8, "white", self._drawing_area, self._piece_location_matrix, [], False)
+        self._white_pawn5 = Pawn("white_Pawn5",6,8, "white", self._drawing_area, self._piece_location_matrix, [], False)
+        self._white_pawn6 = Pawn("white_Pawn6",7,8, "white", self._drawing_area, self._piece_location_matrix, [], False)
+        self._white_pawn7 = Pawn("white_Pawn7",8,8, "white", self._drawing_area, self._piece_location_matrix, [], False)
+        self._white_pawn8 = Pawn("white_Pawn8",9,8, "white", self._drawing_area, self._piece_location_matrix, [], False)
+        #Should be 9
+        self._white_castle1 = Castle("white_Castle1",2,6, "white", self._drawing_area, self._piece_location_matrix, []) 
+        self._white_castle2 = Castle("white_Castle2",9,5, "white", self._drawing_area, self._piece_location_matrix, [])
+
+        #Add pieces to piece list
+        self._pieces.append(self._black_pawn1)
+        self._pieces.append(self._black_pawn2)
+        self._pieces.append(self._black_pawn3)
+        self._pieces.append(self._black_pawn4)
+        self._pieces.append(self._black_pawn5)
+        self._pieces.append(self._black_pawn6)
+        self._pieces.append(self._black_pawn7)
+        self._pieces.append(self._black_pawn8)
+        
+        self._pieces.append(self._white_pawn1)
+        self._pieces.append(self._white_pawn2)
+        self._pieces.append(self._white_pawn3)
+        self._pieces.append(self._white_pawn4)
+        self._pieces.append(self._white_pawn5)
+        self._pieces.append(self._white_pawn6)
+        self._pieces.append(self._white_pawn7)
+        self._pieces.append(self._white_pawn8)
+
+        
+        self._pieces.append(self._white_castle1)
+        self._pieces.append(self._white_castle2)
+        
+        self._pieces.append(self._black_castle1)
+        self._pieces.append(self._black_castle2)
+        
+        print(self._piece_location_matrix)
+        
+        self._drawing_area.bind('<Button-1>', self._check_click)
+
+    def _check_click(self, click_location):
+        if 100 < click_location.y < 900 and 100 < click_location.x < 900:
+            self._good_click(click_location.x, click_location.y)
+    
+    def _good_click(self, x,y):
+        x /= 100
+        y /= 100
+        x = math.floor(x)
+        y = math.floor(y)
+        print("GOOD CLICK")
+        print(self._piece_location_matrix)
+        print("")
+
+        if self._piece_location_matrix[int(y)-1][int(x)-1] != None:
+            located_piece = self._piece_location_matrix[int(y)-1][int(x)-1]
+            for i in self._pieces:
+                i._remove_highlights()
+                i.clear_highlights()
+            
+            if "white" in located_piece:
+                if "Pawn" in located_piece:
+                    if "1" in located_piece: 
+                        self._white_pawn1.highlight_moves(self._piece_location_matrix)
+                    elif "2" in located_piece:
+                        self._white_pawn2.highlight_moves(self._piece_location_matrix)
+                    elif "3" in located_piece:
+                        self._white_pawn3.highlight_moves(self._piece_location_matrix)
+                    elif "4" in located_piece:
+                        self._white_pawn4.highlight_moves(self._piece_location_matrix)
+                    elif "5" in located_piece:
+                        self._white_pawn5.highlight_moves(self._piece_location_matrix)
+                    elif "6" in located_piece:
+                        self._white_pawn6.highlight_moves(self._piece_location_matrix)
+                    elif "7" in located_piece:
+                        self._white_pawn7.highlight_moves(self._piece_location_matrix)
+                    elif "8" in located_piece:
+                        self._white_pawn8.highlight_moves(self._piece_location_matrix)   
+
+                elif "Castle" in located_piece:
+                     if "1" in located_piece:
+                        self._white_castle1.highlight_moves(self._piece_location_matrix)
+                     elif "2" in located_piece:
+                        self._white_castle2.highlight_moves(self._piece_location_matrix)
+                        
+            else:
+                if "Pawn" in located_piece:
+                    if "1" in located_piece:
+                        self._black_pawn1.highlight_moves(self._piece_location_matrix)
+                    elif "2" in located_piece:
+                        self._black_pawn2.highlight_moves(self._piece_location_matrix)
+                    elif "3" in located_piece:
+                        self._black_pawn3.highlight_moves(self._piece_location_matrix)
+                    elif "4" in located_piece:
+                        self._black_pawn4.highlight_moves(self._piece_location_matrix)
+                    elif "5" in located_piece:
+                        self._black_pawn5.highlight_moves(self._piece_location_matrix)
+                    elif "6" in located_piece:
+                        self._black_pawn6.highlight_moves(self._piece_location_matrix)
+                    elif "7" in located_piece:
+                        self._black_pawn7.highlight_moves(self._piece_location_matrix)
+                    elif "8" in located_piece:
+                        self._black_pawn8.highlight_moves(self._piece_location_matrix)   
+
+                elif "Castle" in located_piece:
+                     if "1" in located_piece:
+                        self._black_castle1.highlight_moves(self._piece_location_matrix)
+                     elif "2" in located_piece:
+                        self._black_castle2.highlight_moves(self._piece_location_matrix)
+              
+        else:
+            print("Not there")
+        
+    
+        
+def main():
+    root = tk.Tk()
+    board = Board(root, BOARD_DIMENSIONS, BOARD_DIMENSIONS, [])
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
